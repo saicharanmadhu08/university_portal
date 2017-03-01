@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+<tiles-definitions>
+	<definition name="permitAll.base" template="/WEB-INF/templates/default.jsp">
+		<put-attribute name="title" value="Homepage"></put-attribute>
+		<put-attribute name="header" value="/WEB-INF/tiles/header.jsp"></put-attribute>
+		<put-attribute name="content" value="/WEB-INF/tiles/content.jsp"></put-attribute>
+		<put-attribute name="footer" value="/WEB-INF/tiles/footer.jsp"></put-attribute>
+	</definition>
+	<definition name="authenticated.base" template="/WEB-INF/templates/default2.jsp">
+		<put-attribute name="title" value="Homepage"></put-attribute>
+		<put-attribute name="header" value="/WEB-INF/tiles/header.jsp"></put-attribute>
+		<put-attribute name="menu" value="/WEB-INF/tiles/menu.jsp"></put-attribute>
+		<put-attribute name="content" value="/WEB-INF/tiles/content.jsp"></put-attribute>
+		<put-attribute name="footer" value="/WEB-INF/tiles/footer.jsp"></put-attribute>
+	</definition>
+	<definition name="login" extends="permitAll.base">
+		<put-attribute name="title" value="Login"></put-attribute>
+		<put-attribute name="content" value="/WEB-INF/tiles/login.jsp"></put-attribute>
+	</definition>
+	<definition name="createAccount" extends="permitAll.base">
+		<put-attribute name="title" value="Create Account"></put-attribute>
+		<put-attribute name="content" value="/WEB-INF/tiles/createAccount.jsp"></put-attribute>
+	</definition>
+	<definition name="accountcreated" extends="permitAll.base">
+		<put-attribute name="title" value="Account Created"></put-attribute>
+		<put-attribute name="content" value="/WEB-INF/tiles/accountcreated.jsp"></put-attribute>
+	</definition>
+	<definition name="forgot" extends="permitAll.base">
+		<put-attribute name="title" value="Forgot credentials"></put-attribute>
+		<put-attribute name="content" value="/WEB-INF/tiles/forgot.jsp"></put-attribute>
+	</definition>
+	<definition name="home" extends="authenticated.base">
+		<put-attribute name="title" value="Homepage"></put-attribute>
+		<put-attribute name="content" value="/WEB-INF/tiles/home.jsp"></put-attribute>
+	</definition>
+
+	<definition name="profile" extends="permitAll.base">
+		<put-attribute name="title" value="Profile"></put-attribute>
+		<put-attribute name="content" value="/WEB-INF/tiles/profile.jsp"></put-attribute>
+	</definition>
+	<definition name="emailSent" extends="permitAll.base">
+		<put-attribute name="title" value="Confirm Email"></put-attribute>
+		<put-attribute name="content" value="/WEB-INF/tiles/emailSent.jsp"></put-attribute>
+	</definition>
+	<definition name="resetpassword" extends="permitAll.base">
+		<put-attribute name="title" value="Reset Password"></put-attribute>
+		<put-attribute name="content" value="/WEB-INF/tiles/resetpassword.jsp"></put-attribute>
+	</definition>
+</tiles-definitions>

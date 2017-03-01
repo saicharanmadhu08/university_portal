@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+ <style type="text/css">
+ #editProfile,#changeProfileImage,#changePassword{
+  display: none;
+ }
+ 
+ </style>
+</head>
+<body>
+<div class="list-group ">
+  <a href="#" id="changePasswordButton" class="list-group-item">Change Password</a>
+</div>
+
+<div class="well well-lg">
+
+	<div id="changePassword">
+			<input id="passwordSettings" type="password"  name="password" placeholder="Enter Password"/><br>
+			<div class="error"></div>
+			<input id="confirmpassSettings" type="password" placeholder="Confirm Password"/><br>
+			<div id="matchpassSettings" class="error"></div>
+			<input type="submit" id="changePasswordSettings" value="Change Password" onclick="resetpassword();"/>
+	</div>
+	<div id="settingsUpdated" hidden="true">
+		<p>Success Fully Updated</p>
+	</div>
+</div>
+</body>
+<script type="text/javascript">
+
+$("#changeProfileImageButton").click(function (){
+	$("#settingsUpdated").hide();
+	$("#changeProfileImage").show();
+	$("#changePassword").hide();
+});
+
+$("#changePasswordButton").click(function (){
+	$("#settingsUpdated").hide();
+	$("#changeProfileImage").hide();
+	$("#changePassword").show();
+});
+
+
+$("#passwordSettings").keyup(checkPasswordsMatch);
+$("#confirmpassSettings").keyup(checkPasswordsMatch);
+
+function checkPasswordsMatch() {
+	var password = $("#passwordSettings").val();
+	var confirmpass = $("#confirmpassSettings").val();
+	if (password.length > 3 || confirmpass.length > 3) {
+
+		if (password == confirmpass) {
+			$("#matchpassSettings").text("Passwords Matched");
+			$("#matchpassSettings").addClass("success");
+			$("#matchpassSettings").removeClass("error");
+		} else {
+			$("#matchpassSettings").text("Passwords did not match");
+			$("#matchpassSettings").addClass("error");
+			$("#matchpassSettings").removeClass("success");
+		}
+	}
+}
+
+function resetpassword(){
+	var password = $("#passwordSettings").val();
+	var passwordLength = password.length;
+	if(passwordLength==''){
+		$("#matchpassSettings").text("Password cannot be blank");
+	}else if(passwordLength<8||passwordLength>15){
+		$("#matchpassSettings").text("Password length should be between 8 and 15");
+	}else if(/^\\w{8,}$/.test(password)){
+		$("#matchpassSettings").text("Username can only consist of numbers, letters and the underscore character.");
+	}else{
+		$.ajax({
+			type: 'POST',
+			contentType: 'application/json',
+			url: "http://localhost:8080/university-portal/resetpassword",
+			data: JSON.stringify({"password": password}),
+			success: function (success) 
+	        { onSuccess() },
+			error: function (err)
+			{ onFailure()}
+			
+		});
+	}
+	
+}
+
+function onSuccess(){
+	$("#changePassword").hide();
+	$("#settingsUpdated").show();
+	
+}
+
+function onFailure(){
+	alert("Failed to update");
+}
+
+
+</script>
+</html>
+
+

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" 	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script	src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script	src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<style type="text/css">
+#messengerFornewMessages,#messengerForinboxMessages,#messengerForsentMessages{
+    margin-top:20px;
+    height: 200px;
+    background-color: white;
+    height: 600px;
+    box-shadow: 10px 10px 5px grey;
+    display: none;
+    overflow: scroll;
+}
+#messageSentFail,#messageSentSuccess{
+display: none;
+}
+.receiverNameSpan,.senderNameSpan{
+ font-family: cursive;
+ font-weight: bolder;
+ color: blue;
+}
+.subjectSpan{
+ font-family: serif;
+ font-weight: bold;
+ color: black;
+}
+.messageSpan{
+ font-family: monospace;
+ font-weight: normal;
+ color: black;
+}
+</style>
+</head>
+<body >
+  <div class="row">
+    <div class="col-sm-2" >
+    	<div class="container-fluid">
+    			<div class="list-group">
+  					<a id="inboxMessages" href="#" class="list-group-item"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span> Inbox<span id ="numOfInbox" class="badge"></span></a>
+ 				    <a id="sentMessages" href="#" class="list-group-item"><span class="glyphicon glyphicon-send" aria-hidden="true"></span> Sent<span id ="numOfMsgsSent" class="badge"></span></a>
+ 				    <a id="newMessages" href="#" class="list-group-item"> <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> New Message</a>
+				</div>    		
+    	</div>
+    </div>
+    <div class="col-sm-7" >
+    	<div id="messengerFornewMessages">
+    	<div id="searchUsers" >
+    		<label for="Receiver">Send message to:</label>
+ 			<input type="text" class="form-control" id="search_Key">
+			<div id="display_AllUsers"></div>
+			<label for="subject">Subject:</label>
+ 			<input type="text" class="form-control" id="subject">
+ 			<p id="subjectLength1">Characters left:<span id="subjectLength"></span></p>
+ 			<label for="message">Message:</label>
+    		<textarea class="form-control" id ="messageContent" rows="15" ></textarea><br>
+    		<p id="messageLength1">Characters left:<span id="messageLength"></span></p>
+    		<button type="button" id="sendMessage" class="btn btn-primary">Send</button>
+    	</div>
+    	</div>
+   		<div id="messengerForsentMessages"></div>
+    	<div id="messengerForinboxMessages"></div>
+    	<div id="messageSentSuccess">
+    		<img alt="success gif" src="https://d13yacurqjgara.cloudfront.net/users/137776/screenshots/538878/msg-sent.png">
+    	</div>
+    	<div id="messageSentFail">
+    		<img alt="success gif" src="http://kokaysmalditodiveresort.com/wp-content/uploads/sites/3/2014/09/error-message-try-again-1.jpg">
+    	</div>
+    	
+    </div>
+  </div>
+
+<script type="text/javascript">
+
+var timer;
+
+function startTimer() {
+	timer = window.setInterval(getSentMessages,1000);
+	timer = window.setInterval(getInboxMessages,1000);
+}
+function stopTimer() {
+	window.clearInterval(timer);
+}
+
+function onLoad() {
+	startTimer();
+	stopTimer();
+	getAllUsers();
+	getSentMessages();
+	getInboxMessages();
+}
+
+function getInboxMessages(){
+	$.getJSON("http://localhost:8080/university-portal/getInboxMessages", showInboxMessages);
+}
+
+function showInboxMessages(data){
+	$("#messengerForinboxMessages").html("");
+	$("#numOfInbox").html(data.showInboxMessages.length);
+	for(var i=0;i<data.showInboxMessages.length;i++){
+		var eachMessage = data.showInboxMessages[i];
+		var br = document.createElement("br");
+		var br1 = document.createElement("br");
+		var hr = document.createElement("hr");
+		var hr1 = document.createElement("hr");
+		
+		var allInboxMessagesUl = document.createElement("ul");
+		allInboxMessagesUl.setAttribute("class", "allInboxMessages");
+		
+		var eachInboxMessageLi = document.createElement("li");
+		eachInboxMessageLi.setAttribute("class", "eachInboxMessage");
+		
+		var senderNameSpan = document.createElement("span");
+		senderNameSpan.setAttribute("class", "senderNameSpan");
+		senderNameSpan.appendChild(document.createTextNode("From: "+eachMessage.username));
+		
+		var subjectSpan = document.createElement("span");
+		subjectSpan.setAttribute("class", "subjectSpan");
+		subjectSpan.appendChild(document.createTextNode("Subject: "+eachMessage.subject));
+		
+		var messageSpan = document.createElement("span");
+		messageSpan.setAttribute("class", "messageSpan");
+		messageSpan.appendChild(document.createTextNode("Message: "+eachMessage.message));
+		
+		eachInboxMessageLi.appendChild(senderNameSpan);
+		eachInboxMessageLi.appendChild(br);
+		eachInboxMessageLi.appendChild(subjectSpan);
+		eachInboxMessageLi.appendChild(br1);
+		eachInboxMessageLi.appendChild(messageSpan);
+		eachInboxMessageLi.appendChild(hr);
+		
+		allInboxMessagesUl.appendChild(eachInboxMessageLi);		
+		$("#messengerForinboxMessages").append(allInboxMessagesUl);
+	}
+	
+}
+function getSentMessages(){
+	$.getJSON("http://localhost:8080/university-portal/getSentMessages", showSentMessages);
+}
+
+function showSentMessages(data){
+	$("#messengerForsentMessages").html("");
+	$("#numOfMsgsSent").html(data.showSentMessages.length);
+	for(var i=0;i<data.showSentMessages.length;i++){
+		var eachMessage = data.showSentMessages[i];
+		var br = document.createElement("br");
+		var br1 = document.createElement("br");
+		var hr = document.createElement("hr");
+		var hr1 = document.createElement("hr");
+		
+		var allSentMessagesUl = document.createElement("ul");
+		allSentMessagesUl.setAttribute("class", "allSentMessages");
+		
+		var eachSentMessageLi = document.createElement("li");
+		eachSentMessageLi.setAttribute("class", "eachSentMessage");
+		
+		var receiverNameSpan = document.createElement("span");
+		receiverNameSpan.setAttribute("class", "receiverNameSpan");
+		receiverNameSpan.appendChild(document.createTextNode("To: "+eachMessage.receiverName));
+		
+		var subjectSpan = document.createElement("span");
+		subjectSpan.setAttribute("class", "subjectSpan");
+		subjectSpan.appendChild(document.createTextNode("Subject: "+eachMessage.subject));
+		
+		var messageSpan = document.createElement("span");
+		messageSpan.setAttribute("class", "messageSpan");
+		messageSpan.appendChild(document.createTextNode("Message: "+eachMessage.message));
+		
+		eachSentMessageLi.appendChild(receiverNameSpan);
+		eachSentMessageLi.appendChild(br);
+		eachSentMessageLi.appendChild(subjectSpan);
+		eachSentMessageLi.appendChild(br1);
+		eachSentMessageLi.appendChild(messageSpan);
+		eachSentMessageLi.appendChild(hr);
+		
+		allSentMessagesUl.appendChild(eachSentMessageLi);		
+		$("#messengerForsentMessages").append(allSentMessagesUl);
+	}
+	
+}
+function getAllUsers(){
+	$.getJSON("http://localhost:8080/university-portal/getAllUsers", showAllUsers);
+}
+
+function showAllUsers(data){
+	$("#display_AllUsers").html("");
+	for(var i=0;i<data.allUsers.length;i++){
+		var eachUser = data.allUsers[i];
+		var br = document.createElement("br");
+		var br1 = document.createElement("br");
+		var hr = document.createElement("hr");
+		var hr1 = document.createElement("hr");
+		var fullnameData = eachUser.fullname;
+		var allUsersUl = document.createElement("ul");
+		allUsersUl.setAttribute("class", "allUsers");
+		allUsersUl.setAttribute("id", "displayUsers");
+		
+		var fullnameLi = document.createElement("li");
+		fullnameLi.setAttribute("class", "eachUser");
+		fullnameLi.setAttribute("data-content",fullnameData );
+		fullnameLi.setAttribute("id",fullnameData.replace(/\s+/g, ''));
+		fullnameLi.appendChild(document.createTextNode(eachUser.fullname));
+		
+		
+		allUsersUl.appendChild(fullnameLi);
+
+		
+		$("#display_AllUsers").append(allUsersUl);
+		
+		}
+}
+
+$("#display_AllUsers").hide();
+$("#search_Key").keyup(function (){
+	var searchKey = $(this).val();
+		if(searchKey != ""){
+			$("#display_AllUsers").show();
+			$("#displayUsers li").hide();
+			
+			
+			$("#displayUsers li").each(function(){
+				var currentKey = $(this).attr("data-content");
+				var currentId = $(this).attr("id");
+				$("#"+currentId).click(function (){
+					$("#search_Key").val(currentKey);
+					$("#display_AllUsers").hide();
+				});
+				if(currentKey.indexOf(searchKey)>=0){
+				$(this).show();
+				}
+			});
+		}else{
+			$("#displayUsers li").show();
+			$("#display_AllUsers").hide();
+		}
+		
+
+	
+});
+
+$("#newMessages").click(function (){
+	$("#messengerFornewMessages").show();
+	$("#messengerForinboxMessages").hide();
+	$("#messengerForsentMessages").hide();
+	$("#messageSentSuccess").hide();
+	$("#messageSentFail").hide();
+});
+$("#inboxMessages").click(function (){
+	$("#messengerFornewMessages").hide();
+	$("#messengerForinboxMessages").show();
+	$("#messengerForsentMessages").hide();
+	$("#messageSentSuccess").hide();
+	$("#messageSentFail").hide();
+});
+$("#sentMessages").click(function (){
+	$("#messengerFornewMessages").hide();
+	$("#messengerForinboxMessages").hide();
+	$("#messengerForsentMessages").show();
+	$("#messageSentSuccess").hide();
+	$("#messageSentFail").hide();
+});
+
+$("#subject").keyup(function (){
+	var subject = $(this).val();
+	var subjectLength = subject.length;
+	$("#subjectLength").text(40-subjectLength);
+	var check = subjectLength<=0 || subjectLength>40;
+	$("#post").attr("disabled",check);
+		
+});
+$("#messageContent").keyup(function (){
+	var message = $(this).val();
+	var messageLength = message.length;
+	$("#messageLength").text(1000-messageLength);
+	var check = messageLength<=0 || messageLength>1000;
+	$("#post").attr("disabled",check);
+		
+});
+$("#sendMessage").click(function (){
+	var receiverName = $("#search_Key").val();
+	var subject = $("#subject").val();
+	var messageContent = $("#messageContent").val();
+	 $("#search_Key").val("");
+	 $("#subject").val("");
+	 $("#messageContent").val("");
+	sendMessage(receiverName,subject,messageContent);
+});
+function sendMessage(receivername,subject,messageContent){
+	$.ajax({
+		type: 'POST',
+		contentType: 'application/json',
+		url: "http://localhost:8080/university-portal/sendMessage",
+		data: JSON.stringify({"receivername": receivername,"subject":subject,"messageContent":messageContent}),
+		success: function (msg) 
+        { onSuccess() },
+		error: function (err)
+		{ onFailure()}
+	});
+}
+function onSuccess(){
+	$("#messengerFornewMessages").fadeOut();
+	$("#messageSentSuccess").fadeIn();
+}
+
+function onFailure(){
+	$("#messengerFornewMessages").fadeOut();
+	$("#messageSentFail").fadeIn();
+}
+$(document).ready(onLoad);
+</script>
+</body>
+</html>

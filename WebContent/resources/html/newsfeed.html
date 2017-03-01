@@ -1,0 +1,523 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet"
+	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script
+	src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<style>
+.col-sm-3>div {
+	height: 210px;
+	margin-top: 20px;
+}
+
+.col-sm-9>div {
+	margin-top: 20px;
+}
+
+.col-sm-2>div {
+	margin-top: 20px;
+}
+
+#whatsUp {
+	height: 100px;
+}
+
+.post {
+	
+}
+
+.username {
+	color: blue;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+.likes, .shares, .comments {
+	color: blue;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+#postDivider {
+	display: block;
+	height: 1px;
+	border: 0;
+	border-top: 1px solid #ccc;
+	margin: 1em 0;
+	padding: 0;
+}
+
+.liked {
+	background-color: red;
+}
+
+#fullname {
+	color: blue;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+#username {
+	color: black;
+	font-weight: 400;
+}
+
+#username:hover {
+	font-weight: bold;
+}
+
+#sharedPost, #comments {
+	width: 500px;
+	height: 250px;
+	display: none;
+	overflow: scroll;
+}
+
+#closeSharedPost, #closeComments {
+	float: right;
+	cursor: pointer;
+}
+.category{
+	float: right;
+	color: navy;
+	border-right-color: black;
+	font-weight: bolder;
+	opacity: 0.4;
+}
+#filterCategory{
+	float: right;
+}
+</style>
+</head>
+<body>
+
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-sm-3">
+				<div class="well well-lg">
+					<div id="profileDetails"></div>
+				</div>
+			</div>
+
+			<div class="col-sm-9">
+				<div class="well well-lg" id="sharedPost">
+					<span id="closeSharedPost" class="glyphicon glyphicon-remove"
+						aria-hidden="true"></span>
+					<hr>
+					<div id="showsSharedPost"></div>
+				</div>
+				<div class="well well-lg" id="comments">
+					<span id="closeComments" class="glyphicon glyphicon-remove"
+						aria-hidden="true"></span>
+					<hr>
+					<div id="showsComments">
+						<div id="displayComments"></div>
+						<hr>
+						<textarea class="form-control" id="postComment"
+							placeholder="Add Comment"></textarea>
+						<input id="doComment" class="btn btn-default" type="submit"
+							value="Comment">
+					</div>
+				</div>
+				<div id="postDoGet" class="container-fluid">
+					<div class="well well-lg">
+						<textarea class="form-control" id="whatsUp"
+							placeholder="Whats up ??"></textarea>
+						<p id="numOfChars1">
+							Characters left:<span id="numOfChars"></span>
+						</p>
+						<div class="dropdown" >
+							<button class="btn btn-primary dropdown-toggle" type="button"
+								data-toggle="dropdown" >
+								-category- <span class="caret"></span>
+							</button>
+							<ul class="dropdown-menu" id="category">
+								<li id="all"><a href="#">All</a></li>
+								<li id="cis"id=""><a href="#">CIS</a></li>
+								<li id="cs"><a href="#">CS</a></li>
+								<li id="mis"><a href="#">MIS</a></li>
+								<li id="im"><a href="#">IM</a></li>
+								<li id="finance"><a href="#">Finance</a></li>
+								<li id="iso"><a href="#">ISO</a></li>
+								<li id="sports"><a href="#">Sports</a></li>
+								<li id="general"><a href="#">General</a></li>
+							</ul>
+						</div>
+						<input id="post" class="btn btn-default" type="submit"
+							value="Submit">
+
+					</div>
+					<div class="well well-lg">
+						<p>
+							<a href="#"><span id="newPostsRefresh"
+								class="glyphicon glyphicon-refresh" aria-hidden="true">Refresh
+									for new Posts</span></a>
+									
+							<a href="#"><span id="filterCategory"
+								class="glyphicon glyphicon-filter" aria-hidden="true"><input id="searchCategory" type="text" width="5px"/> Filter posts by Category</span></a>
+								
+						</p>
+						
+								
+						
+						<br>
+						<div id="allPosts"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+
+		var timer;
+		$("#whatsUp").keyup(function() {
+			var text = $(this).val();
+			var textLength = text.length;
+			$("#numOfChars").text(200 - textLength);
+			var check = textLength<=0 || textLength>200;
+			$("#post").attr("disabled", check);
+
+		});
+
+		$("#closeSharedPost").click(function() {
+			$("#sharedPost").hide();
+			$("#postDoGet").show();
+		});
+
+		$("#closeComments").click(function() {
+			$("#comments").hide();
+			$("#postDoGet").show();
+		});
+
+		$("#post").click(function() {
+			newPost();
+
+		});
+		
+		
+		var categoryID;
+		function showPosts(data) {
+			$("#allPosts").html("");
+
+			for (var i = 0; i < data.allPosts.length; i++) {
+				
+				var post = data.allPosts[i];
+				var br = document.createElement("br");
+				var br1 = document.createElement("br");
+				var br2 = document.createElement("br");
+				var br3 = document.createElement("br");
+				var hr = document.createElement("hr");
+				categoryID = post.category;
+				hr.setAttribute("id", "postDivider");
+
+				var postDiv = document.createElement("div");
+				postDiv.setAttribute("class", "post");
+				if(categoryID==""){
+					postDiv.setAttribute("data-category","general");
+				}else{
+					postDiv.setAttribute("data-category",categoryID);
+					
+				}
+				
+				
+				var usernameSpan = document.createElement("span");
+				usernameSpan.setAttribute("class", "username");
+				usernameSpan.setAttribute("data-content", post.username);
+				usernameSpan
+						.appendChild(document.createTextNode(post.username));
+				
+				if(post.category==""){
+					var categorySpan = document.createElement("span");
+					categorySpan.setAttribute("class", "category");
+					categorySpan.appendChild(document.createTextNode("Category: General"));
+				}else{
+					var categorySpan = document.createElement("span");
+					categorySpan.setAttribute("class", "category");
+					categorySpan.appendChild(document.createTextNode("Category: "+post.category));
+				}
+				
+				
+
+				if ((post.text)
+						.includes("http://localhost:8080/university-portal/posts?postid=")) {
+					var textSpan = document.createElement("span");
+					textSpan.setAttribute("class", "sharedtextLink");
+					textSpan.setAttribute("id", "text" + post.postID);
+					textSpan.setAttribute("data-pid", post.postID);
+					var showPost = document.createElement('div');
+					showPost.innerHTML = ("Shared <br>" + post.text).bold();
+					var postID = post.postID;
+					textSpan.appendChild(showPost);
+
+					postDiv.appendChild(usernameSpan);
+					postDiv.appendChild(categorySpan);
+					postDiv.appendChild(br);
+					postDiv.appendChild(textSpan);
+					postDiv.appendChild(br1);
+					postDiv.appendChild(hr);
+
+					$("#allPosts").append(postDiv);
+
+				} else {
+					var textSpan = document.createElement("span");
+					textSpan.setAttribute("class", "text");
+					textSpan.setAttribute("id", "text" + post.postID);
+					textSpan.appendChild(document.createTextNode(post.text));
+
+					var likesSpan = document.createElement("span");
+					likesSpan.setAttribute("class", "likes");
+					likesSpan.setAttribute("data-pid", post.postID);
+					likesSpan.setAttribute("data-likes", post.likes);
+					likesSpan.appendChild(document.createTextNode("Likes: "
+							+ getLikesInfo(post.postID)));
+
+					var sharesSpan = document.createElement("span");
+					sharesSpan.setAttribute("class", "shares");
+					sharesSpan.setAttribute("data-pid", post.postID);
+					sharesSpan.appendChild(document
+							.createTextNode(" ||  Share Post   ||"));
+
+					var commentsSpan = document.createElement("span");
+					commentsSpan.setAttribute("class", "comments");
+					commentsSpan.setAttribute("data-pid", post.postID);
+					commentsSpan.appendChild(document
+							.createTextNode(" Comment"));
+
+					postDiv.appendChild(usernameSpan);
+					postDiv.appendChild(categorySpan);
+					postDiv.appendChild(br);
+					postDiv.appendChild(textSpan);
+					postDiv.appendChild(br1);
+					postDiv.appendChild(br2);
+					postDiv.appendChild(likesSpan);
+					postDiv.appendChild(sharesSpan);
+					postDiv.appendChild(commentsSpan);
+					postDiv.appendChild(hr);
+
+					$("#allPosts").append(postDiv);
+				}
+
+			}
+			$(".username")
+					.click(
+							function() {
+								var username = $(this).attr("data-content");
+								var link = "http://localhost:8080/university-portal/profile?username="
+										+ username;
+								window.location = link;
+							});
+
+			updateLike = $(".likes")
+					.click(
+							function() {
+								var postID = $(this).attr("data-pid");
+								var link = "http://localhost:8080/university-portal/updateLikes";
+								$.ajax({
+									type : 'POST',
+									contentType : 'application/json',
+									url : link,
+									data : JSON.stringify({
+										"postID" : postID
+									}),
+									success : function(data) {
+										getLikesInfo();
+									},
+
+								});
+
+							});
+
+			$(".shares").click(function() {
+				var postID = $(this).attr("data-pid");
+				var link = "http://localhost:8080/university-portal/sharePost";
+				$.ajax({
+					type : 'POST',
+					contentType : 'application/json',
+					url : link,
+					data : JSON.stringify({
+						"postid" : postID
+					}),
+
+				});
+			});
+
+			$(".sharedtextLink").click(
+					function() {
+						$("#postDoGet").hide();
+						$("#sharedPost").show();
+						var postID = $(this).attr("data-pid");
+						$.getJSON(
+								"http://localhost:8080/university-portal/posts?postid="
+										+ postID, showSharedPost);
+					});
+
+			$(".comments").click(
+					function() {
+						$("#postDoGet").hide();
+						$("#comments").show();
+						commentPostId = $(this).attr("data-pid");
+
+						$.getJSON(
+								"http://localhost:8080/university-portal/getComments?postid="
+										+ commentPostId, showComments);
+
+					});
+
+		}
+
+		function showComments(data) {
+			$("#displayComments").html("");
+			if (data.commentForPost == 0) {
+				$("#displayComments").html("");
+
+			} else {
+				for (var i = 0; i < data.postComments.length; i++) {
+					var eachComment = data.postComments[i];
+					var username = eachComment.username;
+					var commentText = eachComment.text;
+					$("#displayComments").append(
+							"<b>" + username + "</b>" + " said  " + "<b>"
+									+ commentText + "</b><br>");
+
+				}
+
+			}
+
+		}
+		function showSharedPost(data) {
+			$("#showsSharedPost").html(
+					"<b>" + data.actualUser + "<b>" + "<br><br>"
+							+ data.actualText);
+
+		}
+
+		function getLikesInfo(postID) {
+
+			var numOfLikes = 0;
+
+			$
+					.ajax({
+						async : false,
+						url : "http://localhost:8080/university-portal/getLikesInfo?postid="
+								+ postID,
+						success : function(data) {
+							numOfLikes = data.profileLikes.length;
+
+						}
+					});
+
+			return numOfLikes;
+
+		}
+
+		function showUserDetails(data) {
+			$("#profileDetails").html("");
+			var userDetails = data.userDetails[0];
+			var fullname = userDetails.fullname;
+			var username = userDetails.username;
+			var email = userDetails.email;
+			$("#profileDetails").html(
+					"<p id=fullname >" + fullname + "<br><span id=username>@"
+							+ username + "<span></p><br>" + "<p>" + email
+							+ "</p>");
+
+		}
+		
+		var category;
+		$('.dropdown-menu li').on('click',  function () {
+	        category = $(this).attr('id');
+	        
+	    });
+
+		function newPost() {
+			var text = $("#whatsUp").val();
+			$.ajax({
+				type : 'POST',
+				contentType : 'application/json',
+				url : "http://localhost:8080/university-portal/doPost",
+				data : JSON.stringify({
+					"text" : text,
+					"category":category
+				}),
+				success : function(msg) {
+					$("#whatsUp").val("");
+				}
+			});
+
+		}
+
+		function onLoad() {
+			var text = $("#whatsUp").val();
+			var textLength = text.length;
+			var check = textLength<=0 || textLength>200;
+			$("#post").attr("disabled", check);
+			updatePage();
+			startTimer();
+			getUserDetails();
+		}
+		function startTimer() {
+			timer = window.setInterval(updatePage, 100000000);
+		}
+		function stopTimer() {
+			window.clearInterval(timer);
+		}
+
+		$("#newPostsRefresh").click(function() {
+			updatePage();
+		});
+		function updatePage() {
+			$.getJSON("http://localhost:8080/university-portal/getAllPosts",
+					showPosts);
+		}
+		function getUserDetails() {
+			$.getJSON("http://localhost:8080/university-portal/getUserDetails",
+					showUserDetails);
+		}
+		var commentPostId;
+		$("#doComment").click(function() {
+			var commentText = $("#postComment").val();
+			var postid = commentPostId;
+			$.ajax({
+				type : 'POST',
+				contentType : 'application/json',
+				url : "http://localhost:8080/university-portal/doComment",
+				data : JSON.stringify({
+					"commentText" : commentText,
+					"postid" : postid
+				}),
+				success : function(msg) {
+					$("#postComment").val("");
+				}
+			});
+
+		});
+		
+		$("#searchCategory").keyup(function() {
+			var searchKey = $(this).val();
+			if (searchKey != "") {
+				$(".post").hide();
+				$("#allPosts div").each(function(){
+					var currentKey = $(this).attr("data-category");
+					if (currentKey.indexOf(searchKey) >= 0) {
+						$(this).show();
+					}
+				});
+			
+				 
+			} else {
+				$(".post").show();
+			}
+
+		});
+		$(document).ready(onLoad);
+	</script>
+</body>
+</html>
